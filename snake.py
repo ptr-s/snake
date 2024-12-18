@@ -20,7 +20,7 @@ pygame.display.set_caption('Змейка')
 
 # Установка параметров игры
 snake_block = 10
-snake_speed = 15
+snake_speed = 10
 
 # Установка шрифта
 font_style = pygame.font.SysFont("bahnschrift", 25)
