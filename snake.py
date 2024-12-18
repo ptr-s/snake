@@ -1,6 +1,6 @@
 import pygame
-import time
 import random
+from config import *
 
 # Инициализация Pygame
 pygame.init()
@@ -11,6 +11,7 @@ white = (255, 255, 255)
 red = (213, 50, 80)
 green = (0, 255, 0)
 blue = (50, 153, 213)
+gray = (169, 169, 169)  # Цвет камней
 
 # Установка размеров окна
 width = 600
@@ -19,16 +20,20 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('Змейка')
 
 # Установка параметров игры
-snake_block = 10
-snake_speed = 10
+snake_block = 20
+snake_speed = 15
 
 # Установка шрифта
-font_style = pygame.font.SysFont("bahnschrift", 25)
-score_font = pygame.font.SysFont("comicsansms", 35)
+font_style = pygame.font.Font("assets/bahnschrift.ttf", 25)
+score_font = pygame.font.Font("assets/Comic Sans MS.ttf", 35)
 
 def our_snake(snake_block, snake_list):
     for x in snake_list:
         pygame.draw.rect(screen, black, [x[0], x[1], snake_block, snake_block])
+
+def draw_stones(stones):
+    for stone in stones:
+        pygame.draw.rect(screen, gray, [stone[0], stone[1], snake_block, snake_block])
 
 def message(msg, color):
     mesg = font_style.render(msg, True, color)
@@ -46,9 +51,11 @@ def gameLoop():  # основной игровой цикл
 
     snake_List = []
     Length_of_snake = 1
+    food_count = 0  # Счётчик еды
+    stones = []  # Список камней
 
-    foodx = round(random.randrange(0, width - snake_block) / 10.0) * 10.0
-    foody = round(random.randrange(0, height - snake_block) / 10.0) * 10.0
+    foodx = round(random.randrange(0, width - snake_block) / 20.0) * 20.0
+    foody = round(random.randrange(0, height - snake_block) / 20.0) * 20.0
 
     while not game_over:
 
@@ -89,6 +96,15 @@ def gameLoop():  # основной игровой цикл
         y1 += y1_change
         screen.fill(blue)
         pygame.draw.rect(screen, green, [foodx, foody, snake_block, snake_block])
+
+        # Добавление камней после 5 кусочков пищи
+        if food_count >= 5 and len(stones) < 5:  # Максимум 5 камней
+            stone_x = round(random.randrange(0, width - snake_block) / 10.0) * 10.0
+            stone_y = round(random.randrange(0, height - snake_block) / 10.0) * 10.0
+            stones.append((stone_x, stone_y))
+
+        draw_stones(stones)
+
         snake_Head = []
         snake_Head.append(x1)
         snake_Head.append(y1)
@@ -102,12 +118,19 @@ def gameLoop():  # основной игровой цикл
 
         our_snake(snake_block, snake_List)
 
-        pygame.display.update()
-
+        # Проверка на столкновение со стенами
         if x1 == foodx and y1 == foody:
-            foodx = round(random.randrange(0, width - snake_block) / 10.0) * 10.0
-            foody = round(random.randrange(0, height - snake_block) / 10.0) * 10.0
+            foodx = round(random.randrange(0, width - snake_block) / 20.0) * 20.0
+            foody = round(random.randrange(0, height - snake_block) / 20.0) * 20.0
             Length_of_snake += 1
+            food_count += 1  # Увеличиваем счётчик еды
+
+        # Проверка на столкновение с камнями
+        for stone in stones:
+            if snake_Head[0] == stone:
+                game_close = True
+
+        pygame.display.update()
 
         pygame.time.Clock().tick(snake_speed)
 
